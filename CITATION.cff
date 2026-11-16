@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+message: "If you implement, extend, or critique this specification, please cite it as below."
+title: "Seam Specification"
+abstract: >-
+  A specification for observable agent-simulation interfaces. Defines a declarative
+  manifest as the single source of truth for a simulation's surface, with two projections
+  (human bindings and agent tool signatures) and an append-only crossing trace. Four
+  affordances — trigger, dial, ratchet, gauge — are derived mechanically from three
+  declared facts: writeability, domain shape, and liveness.
+authors:
+  - family-names: "Meng"
+    given-names: "Runyu"
+    affiliation: "Department of Astronomy"
+version: "0.1-draft"
+date-released: "2026-11-15"
+license: "CC-BY-4.0"
+type: software
+repository-code: "https://github.com/islent/seam"
+keywords:
+  - agent-simulation interface
+  - scientific computing
+  - human-in-the-loop
+  - observability
+  - provenance
+  - simulation steering
+preferred-citation:
+  type: generic
+  title: "Seam: a specification for observable agent-simulation interfaces"
+  authors:
+    - family-names: "Meng"
+      given-names: "Runyu"
+  year: 2026
+  version: "0.1-draft"

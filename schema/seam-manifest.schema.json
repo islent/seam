@@ -1,0 +1,453 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/islent/seam/schema/seam-manifest.schema.json",
+  "title": "Seam Manifest",
+  "description": "Normative grammar for a Seam manifest. TOML and JSON forms are losslessly convertible; this schema describes the JSON form, and applies unchanged to the TOML form after conversion.",
+  "type": "object",
+  "required": [
+    "seam",
+    "identity"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "seam": {
+      "type": "object",
+      "required": [
+        "version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^0\\.[0-9]+$"
+        },
+        "profile": {
+          "type": "string",
+          "enum": [
+            "L0",
+            "L1",
+            "L2"
+          ],
+          "description": "Conformance level the adapter claims. See SPEC \u00a79."
+        }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "required": [
+        "name",
+        "code",
+        "entry"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "domain": {
+          "type": "string",
+          "description": "Physics domain, free text: photonics, plasma, cosmology, ..."
+        },
+        "code": {
+          "type": "string",
+          "description": "Code name and version, e.g. 'Meep 1.33.0'."
+        },
+        "entry": {
+          "type": "string",
+          "description": "Exposure locator: python:<module>, cli:<binary>, julia:<module>."
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Locators actually consulted during derivation, in ladder order."
+        },
+        "derived_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "cadence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "poll": {
+          "type": "string",
+          "pattern": "^[0-9]+(ms|s|m)$"
+        },
+        "settle": {
+          "type": "string",
+          "pattern": "^[0-9]+(ms|s|m)$"
+        }
+      }
+    },
+    "param": {
+      "type": "array",
+      "description": "Intervention Points. SPEC \u00a74.1.",
+      "items": {
+        "$ref": "#/$defs/intervention"
+      }
+    },
+    "observe": {
+      "type": "array",
+      "description": "Observation Points. SPEC \u00a74.2.",
+      "items": {
+        "$ref": "#/$defs/observation"
+      }
+    },
+    "artifact": {
+      "type": "array",
+      "description": "File-backed products. SPEC \u00a74.5.",
+      "items": {
+        "$ref": "#/$defs/artifact"
+      }
+    },
+    "notes": {
+      "type": "array",
+      "description": "Values deliberately dropped from the manifest, with the reason. See AGENT-PROTOCOL move 2, gate 2.",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "reason"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "witness": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "provenance": {
+      "type": "object",
+      "required": [
+        "grade",
+        "witness"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "grade": {
+          "type": "string",
+          "enum": [
+            "E0",
+            "E1",
+            "E2",
+            "E3",
+            "E4"
+          ]
+        },
+        "evidence": {
+          "type": "string",
+          "enum": [
+            "author",
+            "signature",
+            "source",
+            "argparse",
+            "deck-grammar",
+            "paramfile-grammar",
+            "struct",
+            "docstring",
+            "help",
+            "name",
+            "unit",
+            "run",
+            "signal-probe",
+            "callback"
+          ]
+        },
+        "witness": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Locator a third party can check: file:line, python:dotted.name, shell:cmd, run:<id>."
+        },
+        "assumed": {
+          "type": "boolean",
+          "description": "True when the value is an editorial choice rather than an observed fact."
+        }
+      }
+    },
+    "domain": {
+      "type": "object",
+      "required": [
+        "kind"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "continuous",
+            "enum",
+            "void"
+          ]
+        },
+        "lo": {
+          "type": "number"
+        },
+        "hi": {
+          "type": "number"
+        },
+        "step": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "log": {
+          "type": "boolean"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": [
+              "string",
+              "number",
+              "boolean"
+            ]
+          }
+        },
+        "dtype": {
+          "type": "string",
+          "enum": [
+            "int",
+            "float",
+            "bool",
+            "str"
+          ]
+        }
+      }
+    },
+    "intervention": {
+      "type": "object",
+      "required": [
+        "name",
+        "affordance",
+        "provenance"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+        },
+        "affordance": {
+          "type": "string",
+          "enum": [
+            "dial",
+            "ratchet",
+            "trigger",
+            "unresolved"
+          ]
+        },
+        "liveness": {
+          "type": "string",
+          "enum": [
+            "sealed",
+            "midrun",
+            "perstep"
+          ],
+          "description": "Required unless affordance is unresolved."
+        },
+        "grade": {
+          "type": "string",
+          "enum": [
+            "advisory",
+            "imperative",
+            "gated"
+          ]
+        },
+        "domain": {
+          "$ref": "#/$defs/domain"
+        },
+        "default": {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        "unit": {
+          "type": "string"
+        },
+        "display_scale": {
+          "type": "number",
+          "description": "Multiplier applied for display; the manifest value is in code units. See PROBES \u00a74.3 (Gadget-2 TimeMax)."
+        },
+        "doc": {
+          "type": "string"
+        },
+        "transition": {
+          "type": "string",
+          "description": "State transition a trigger causes, e.g. 'running -> terminated'."
+        },
+        "timeout": {
+          "type": "string",
+          "pattern": "^[0-9]+(ms|s|m)$",
+          "description": "For gated IPs: when an unacknowledged write is withdrawn."
+        },
+        "adapter_key": {
+          "type": "string",
+          "description": "Name in the underlying code, when it differs from `name`."
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "group": {
+          "type": "string",
+          "maxLength": 40,
+          "description": "SPEC 4.7a. Layout section; bindings follow it in first-appearance order."
+        },
+        "precision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 12,
+          "description": "SPEC 4.7b. Significant digits for display; 0 means exact integer."
+        },
+        "confirm": {
+          "type": "boolean",
+          "description": "SPEC 4.7e. Destructive trigger: a binding must arm before firing. Only legal on affordance=trigger."
+        }
+      }
+    },
+    "observation": {
+      "type": "object",
+      "required": [
+        "name",
+        "shape",
+        "pitch",
+        "source",
+        "provenance"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-zA-Z_][a-zA-Z0-9_]*$"
+        },
+        "shape": {
+          "type": "string",
+          "enum": [
+            "scalar",
+            "series",
+            "grid",
+            "table",
+            "log"
+          ]
+        },
+        "pitch": {
+          "type": "string",
+          "pattern": "^(per-step|on-demand|per-second:[0-9]+(\\.[0-9]+)?)$"
+        },
+        "source": {
+          "type": "string",
+          "pattern": "^(stdout|file|api|metric):"
+        },
+        "unit": {
+          "type": "string"
+        },
+        "dimensions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "For series/grid: names of the axes, fastest-varying last."
+        },
+        "doc": {
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        },
+        "preview": {
+          "type": "object",
+          "description": "SPEC 4.6. Required for a grid at a live pitch: what crosses the seam is a reduced frame.",
+          "additionalProperties": false,
+          "properties": {
+            "max_width": {
+              "type": "integer",
+              "minimum": 8,
+              "maximum": 4096
+            },
+            "diverging": {
+              "type": "boolean",
+              "description": "Symmetric colour map for quantities that cross zero."
+            }
+          }
+        },
+        "group": {
+          "type": "string",
+          "maxLength": 40,
+          "description": "SPEC 4.7a. Layout section; bindings follow it in first-appearance order."
+        },
+        "precision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 12,
+          "description": "SPEC 4.7b. Significant digits for display; 0 means exact integer."
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "required": [
+        "name",
+        "path",
+        "shape",
+        "pitch",
+        "provenance"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string",
+          "description": "May contain a printf-style step placeholder, e.g. output/snap_%03d.hdf5."
+        },
+        "shape": {
+          "type": "string",
+          "enum": [
+            "grid",
+            "table",
+            "series",
+            "blob"
+          ]
+        },
+        "pitch": {
+          "type": "string",
+          "pattern": "^(per-step|on-demand|per-second:[0-9]+(\\.[0-9]+)?)$"
+        },
+        "doc": {
+          "type": "string"
+        },
+        "provenance": {
+          "$ref": "#/$defs/provenance"
+        }
+      }
+    }
+  }
+}
